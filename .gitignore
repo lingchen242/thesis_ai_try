@@ -1,0 +1,55 @@
+# =============================================================================
+# 毕业论文管理系统 · Git 忽略规则
+# =============================================================================
+
+# ---------------------------------------------------------------- 后端 (Java)
+backend/target/
+*.class
+*.jar
+*.war
+!.mvn/wrapper/maven-wrapper.jar
+
+# 本地运行时产生的文件存储（忽略上传内容，仅保留目录占位文件）
+backend/storage/uploads/**/*
+!backend/storage/uploads/proposal/.gitkeep
+!backend/storage/uploads/midterm/.gitkeep
+!backend/storage/uploads/final/.gitkeep
+!backend/storage/uploads/other/.gitkeep
+
+# ------------------------------------------------------------------- 前端
+frontend/node_modules/
+frontend/dist/
+frontend/.vite/
+frontend/*.local
+frontend/.eslintcache
+
+# ------------------------------------------------------------------- 数据库
+# 本地导出的备份，不入库
+database/*.bak
+database/*.dump
+*.sql.gz
+
+# ------------------------------------------------------------------- 环境
+# 本地连接配置（含真实账号密码），不要提交
+backend/src/main/resources/application-local.yml
+.env
+.env.*
+!.env.example
+
+# ------------------------------------------------------------------- 通用
+logs/
+*.log
+.DS_Store
+Thumbs.db
+.idea/
+*.iml
+.vscode/
+!.vscode/extensions.json
+
+# ------------------------------------------------------------------- 工具
+__pycache__/
+*.pyc
+.venv/
+
+# WorkBuddy 工作区本地状态（记忆、缓存等，不入库）
+.workbuddy/

@@ -2,7 +2,10 @@
 -- 毕业论文管理系统 · 数据库结构 (MySQL 8.0)
 -- 库名：thesis_mgmt
 -- 说明：本文件只建表，不含业务数据。重复执行安全（先 DROP 后 CREATE）。
--- 导入：mysql -u root -p thesis_mgmt < sql/01_schema.sql
+--       共 20 张表：18 张业务表 + 2 张字典表（sys_dict_type / sys_dict_item）。
+--       字典表统一维护学院/专业/班级（三级树）、届别、课题类型、课题来源、
+--       教师职称、答辩结论；业务表冗余存名称以保证归档数据稳定。
+-- 导入：mysql -u root -p thesis_mgmt < database/01_schema.sql
 -- =============================================================================
 
 SET NAMES utf8mb4;
@@ -402,5 +405,40 @@ CREATE TABLE `sys_config` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `uk_sys_config_key` (`config_key`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='系统配置';
+
+-- -----------------------------------------------------------------------------
+-- 19. 字典类型
+-- -----------------------------------------------------------------------------
+DROP TABLE IF EXISTS `sys_dict_type`;
+CREATE TABLE `sys_dict_type` (
+  `id`          BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `type_code`   VARCHAR(64) NOT NULL COMMENT '类型编码 如 COLLEGE/MAJOR/CLASS',
+  `type_name`   VARCHAR(64) NOT NULL COMMENT '类型名称',
+  `remark`      VARCHAR(255) DEFAULT NULL,
+  `create_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `update_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uk_dict_type_code` (`type_code`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='字典类型';
+
+-- -----------------------------------------------------------------------------
+-- 20. 字典项（parent_id 支持树形：学院 -> 专业 -> 班级）
+-- -----------------------------------------------------------------------------
+DROP TABLE IF EXISTS `sys_dict_item`;
+CREATE TABLE `sys_dict_item` (
+  `id`          BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `type_code`   VARCHAR(64) NOT NULL COMMENT '所属字典类型',
+  `item_code`   VARCHAR(64) NOT NULL COMMENT '项目编码（同一类型内唯一）',
+  `item_name`   VARCHAR(128) NOT NULL COMMENT '项目名称（业务表冗余存储该名称）',
+  `parent_id`   BIGINT UNSIGNED DEFAULT NULL COMMENT '上级字典项 id，顶级为 NULL',
+  `sort_no`     INT NOT NULL DEFAULT 0 COMMENT '排序号，越小越靠前',
+  `status`      TINYINT NOT NULL DEFAULT 1 COMMENT '1启用 0停用',
+  `remark`      VARCHAR(255) DEFAULT NULL,
+  `create_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `update_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uk_dict_item_code` (`type_code`, `item_code`),
+  KEY `idx_dict_item_type_parent` (`type_code`, `parent_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='字典项';
 
 SET FOREIGN_KEY_CHECKS = 1;

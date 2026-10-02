@@ -20,7 +20,7 @@ import bcrypt
 
 SEED = 20261002
 OUT_PATH = os.path.normpath(
-    os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "sql", "02_demo_data.sql")
+    os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "database", "02_demo_data.sql")
 )
 
 rnd = random.Random(SEED)
@@ -72,7 +72,61 @@ COLLEGES = {
 }
 TITLES = ["教授", "副教授", "讲师", "助教"]
 TOPIC_TYPES = ["理论研究", "工程设计", "软件开发", "实验研究", "调研报告"]
-TOPIC_SOURCES = ["教师命题", "教师命题", "教师命题", "企业真题", "学生自拟"]
+TOPIC_SOURCES = ["教师命题", "企业真题", "学生自拟"]
+DEFENSE_RESULTS = ["通过", "暂缓", "不通过"]
+
+# 专业简称（用于生成班级名）与届别 -> 入学年级
+MAJOR_ABBR = {
+    "计算机科学与技术": "计科", "人工智能": "智能", "数据科学与大数据技术": "数科",
+    "软件工程": "软工", "网络空间安全": "网安",
+    "电子信息工程": "电信", "通信工程": "通信",
+}
+GRADE_ENROLL_YEAR = {"2026": "22", "2027": "23"}
+
+# --------------------------------------------------------------------------- #
+# 字典数据：学院 -> 专业 -> 班级 三级树 + 其余平铺字典
+# --------------------------------------------------------------------------- #
+DICT_TYPES = [
+    ("COLLEGE", "学院", "组织架构一级：学院"),
+    ("MAJOR", "专业", "组织架构二级：专业（父级为学院）"),
+    ("CLASS", "班级", "组织架构三级：班级（父级为专业）"),
+    ("GRADE", "届别", "毕业届别"),
+    ("TOPIC_TYPE", "课题类型", "课题性质分类"),
+    ("TOPIC_SOURCE", "课题来源", "课题来源渠道"),
+    ("TITLE", "教师职称", "教师专业技术职称"),
+    ("DEFENSE_RESULT", "答辩结论", "答辩结果结论"),
+]
+
+org_items = []          # (type_code, item_code, item_name, parent_code, sort_no)
+classes_by = {}         # (college, major, grade) -> [班级名, ...]
+_seq_c = _seq_m = _seq_k = 0
+for _college, _majors in COLLEGES.items():
+    _seq_c += 1
+    _c_code = "C%02d" % _seq_c
+    org_items.append(("COLLEGE", _c_code, _college, None, _seq_c))
+    for _major in _majors:
+        _seq_m += 1
+        _m_code = "M%03d" % _seq_m
+        org_items.append(("MAJOR", _m_code, _major, _c_code, _seq_m))
+        for _grade, _enroll in GRADE_ENROLL_YEAR.items():
+            names = []
+            for _n in (1, 2):
+                _seq_k += 1
+                _cls = "%s%s-%d班" % (MAJOR_ABBR[_major], _enroll, _n)
+                org_items.append(("CLASS", "K%04d" % _seq_k, _cls, _m_code, _seq_k))
+                names.append(_cls)
+            classes_by[(_college, _major, _grade)] = names
+
+simple_items = (
+    [("GRADE", "G%s" % g, g, None, i) for i, g in enumerate(sorted(GRADE_ENROLL_YEAR), 1)]
+    + [("TOPIC_TYPE", "TT%02d" % i, t, None, i) for i, t in enumerate(TOPIC_TYPES, 1)]
+    + [("TOPIC_SOURCE", "TS%02d" % i, t, None, i) for i, t in enumerate(TOPIC_SOURCES, 1)]
+    + [("TITLE", "TI%02d" % i, t, None, i) for i, t in enumerate(TITLES, 1)]
+    + [("DEFENSE_RESULT", "DR%02d" % i, t, None, i)
+       for i, t in enumerate(DEFENSE_RESULTS, 1)]
+)
+dict_items = list(org_items) + simple_items
+DICT_ITEM_COUNT = len(dict_items)
 
 SURNAMES = list(
     "王李张刘陈杨黄赵吴周徐孙马朱胡郭何高林罗郑梁谢宋唐许韩冯邓曹彭曾肖田董袁潘"
@@ -233,7 +287,7 @@ for grade, n, stages in ((2026, N_STUDENT_2026, stage_2026), (2027, N_STUDENT_20
         college = college_names[i % len(college_names)]
         majors = COLLEGES[college]
         major = majors[i % len(majors)]
-        cls = "%s%s班" % (str(grade)[2:], chr(ord("A") + (i % 3)))
+        cls = classes_by[(college, major, str(grade))][i % 2]
         name = rand_name()
         no = "%d%04d" % (grade, seq)
         users.append({
@@ -664,6 +718,11 @@ configs = [
     ("current.grade", "2027", "当前默认届别"),
 ]
 
+print("  字典 %d 类型 / %d 项（学院 %d、专业 %d、班级 %d）"
+      % (len(DICT_TYPES), DICT_ITEM_COUNT,
+         sum(1 for x in dict_items if x[0] == "COLLEGE"),
+         sum(1 for x in dict_items if x[0] == "MAJOR"),
+         sum(1 for x in dict_items if x[0] == "CLASS")))
 print("  用户 %d / 教师 %d / 学生 %d / 课题 %d / 论文 %d"
       % (len(users), len(teachers), len(student_pool), len(topics), len(theses)))
 print("  开题 %d / 中期 %d / 定稿 %d / 评阅 %d / 答辩成绩 %d / 附件 %d / 日志 %d / 消息 %d"
@@ -687,9 +746,9 @@ def emit_insert(f, table, cols, rows, chunk=20):
 os.makedirs(os.path.dirname(OUT_PATH), exist_ok=True)
 with open(OUT_PATH, "w", encoding="utf-8", newline="\n") as f:
     f.write("""-- =============================================================================
--- 毕业论文管理系统 · 演示数据
+-- 毕业论文管理系统 · 演示数据（含字典基础数据）
 -- 生成脚本：scripts/gen_demo_sql.py（固定随机种子，可重复生成）
--- 导入：mysql -u root -p thesis_mgmt < sql/02_demo_data.sql
+-- 导入：mysql -u root -p thesis_mgmt < database/02_demo_data.sql
 --
 -- 账号与密码（BCrypt 加密，cost=10）：
 --   管理员      admin          / admin123
@@ -698,6 +757,7 @@ with open(OUT_PATH, "w", encoding="utf-8", newline="\n") as f:
 --   学生        s20260001...   / 123456
 --
 -- 数据规模：
+--   字典类型 %d / 字典项 %d（学院 %d、专业 %d、班级 %d）
 --   管理员 1 / 指导教师 %d / 评阅教师 %d / 学生 %d（2026届 %d，2027届 %d）
 --   课题 %d（已选 %d，开放 %d） / 选题申请 %d / 论文 %d（覆盖 11 种状态）
 --   开题 %d / 中期 %d / 定稿 %d / 评阅 %d / 答辩组 %d / 答辩成绩 %d
@@ -727,11 +787,41 @@ TRUNCATE TABLE `student`;
 TRUNCATE TABLE `teacher`;
 TRUNCATE TABLE `sys_user`;
 TRUNCATE TABLE `sys_config`;
+TRUNCATE TABLE `sys_dict_item`;
+TRUNCATE TABLE `sys_dict_type`;
 
-""" % (N_ADVISOR, N_REVIEWER, len(student_pool), N_STUDENT_2026, N_STUDENT_2027,
+""" % (len(DICT_TYPES), DICT_ITEM_COUNT,
+        sum(1 for x in dict_items if x[0] == "COLLEGE"),
+        sum(1 for x in dict_items if x[0] == "MAJOR"),
+        sum(1 for x in dict_items if x[0] == "CLASS"),
+        N_ADVISOR, N_REVIEWER, len(student_pool), N_STUDENT_2026, N_STUDENT_2027,
         len(topics), len(with_thesis), N_OPEN_TOPIC, len(selections), len(theses),
         len(proposals), len(midterms), len(finals), len(reviews), len(groups),
         len(defense_records), len(attachments), len(audit_logs), len(notifications)))
+
+    # 字典类型 + 字典项（最先输出，业务数据的可选项来源于此）
+    rows = [{"id": q(i + 1), "type_code": q(c), "type_name": q(n), "remark": q(r),
+             "create_time": "NOW()", "update_time": "NOW()"}
+            for i, (c, n, r) in enumerate(DICT_TYPES)]
+    f.write("-- 0.1 字典类型（sys_dict_type）\n")
+    emit_insert(f, "sys_dict_type", ["id", "type_code", "type_name", "remark",
+                                     "create_time", "update_time"], rows)
+
+    code2id, di_rows, di_id = {}, [], 1
+    for type_code, item_code, item_name, parent_code, sort_no in dict_items:
+        code2id[item_code] = di_id
+        di_rows.append({
+            "id": q(di_id), "type_code": q(type_code), "item_code": q(item_code),
+            "item_name": q(item_name),
+            "parent_id": q(code2id[parent_code]) if parent_code else "NULL",
+            "sort_no": q(sort_no), "status": "1", "remark": "NULL",
+            "create_time": "NOW()", "update_time": "NOW()",
+        })
+        di_id += 1
+    f.write("-- 0.2 字典项（sys_dict_item）：学院 -> 专业 -> 班级 三级树 + 平铺字典\n")
+    emit_insert(f, "sys_dict_item", ["id", "type_code", "item_code", "item_name", "parent_id",
+                                     "sort_no", "status", "remark", "create_time",
+                                     "update_time"], di_rows)
 
     # sys_user
     rows = [{

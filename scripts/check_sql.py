@@ -85,8 +85,8 @@ def load_rows(path, table):
 
 
 def main():
-    schema = os.path.join(ROOT, "sql", "01_schema.sql")
-    demo = os.path.join(ROOT, "sql", "02_demo_data.sql")
+    schema = os.path.join(ROOT, "database", "01_schema.sql")
+    demo = os.path.join(ROOT, "database", "02_demo_data.sql")
     ok = True
 
     # 1) 语法结构
@@ -109,6 +109,8 @@ def main():
         "defense_record": ["thesis_id"],
         "thesis_score": ["thesis_id"],
         "sys_config": ["config_key"],
+        "sys_dict_type": ["type_code"],
+        "sys_dict_item": ["type_code", "item_code"],
     }
     print("\n唯一键检查：")
     for table, key_sets in uniques.items():
@@ -149,6 +151,7 @@ def main():
         ("thesis_score", "thesis_id", "thesis", "id"),
         ("notification", "user_id", "sys_user", "id"),
         ("audit_log", "actor_id", "sys_user", "id"),
+        ("sys_dict_item", "parent_id", "sys_dict_item", "id"),
     ]
     cache = {}
     for child, ckey, parent, pkey in refs:
@@ -167,6 +170,38 @@ def main():
                   % (child, ckey, parent, pkey, len(bad), bad[:5]))
         else:
             print("  [OK  ] %-22s.%s -> %s.%s" % (child, ckey, parent, pkey))
+
+    # 3.5) 业务表名称字段必须命中字典项
+    print("\n字典一致性检查：")
+    items = load_rows(demo, "sys_dict_item")
+    name_sets = collections.defaultdict(set)
+    for r in items:
+        name_sets[r["type_code"].strip("'")].add(r["item_name"].strip("'"))
+    dict_checks = [
+        ("student", "college", "COLLEGE"),
+        ("student", "major", "MAJOR"),
+        ("student", "class_name", "CLASS"),
+        ("student", "grade", "GRADE"),
+        ("topic", "topic_type", "TOPIC_TYPE"),
+        ("topic", "source", "TOPIC_SOURCE"),
+        ("topic", "grade", "GRADE"),
+        ("teacher", "title", "TITLE"),
+    ]
+    for table, field, type_code in dict_checks:
+        bad = set()
+        for r in load_rows(demo, table):
+            v = r[field]
+            if v == "NULL":
+                continue
+            if v.strip("'") not in name_sets[type_code]:
+                bad.add(v)
+        if bad:
+            ok = False
+        print("  [%s] %-16s.%-12s -> %s" % ("OK " if not bad else "FAIL", table, field, type_code))
+        if bad:
+            print("        未命中字典项: %s" % sorted(bad)[:5])
+    print("  字典项统计: %s"
+          % dict(collections.Counter(r["type_code"].strip("'") for r in items)))
 
     # 4) 状态分布
     print("\n论文状态分布：")
