@@ -1,0 +1,20 @@
+# =============================================================================
+# 本地配置示例
+# 用法：
+#   1. 复制本文件为同目录下的 application-local.yml
+#   2. 填入真实的 MySQL 连接信息
+#   3. 启动时指定 profile：--spring.profiles.active=local
+#
+# 好处：application.yml 中的占位符保持不动，个人连接信息不会被提交到 git
+# （.gitignore 已忽略 application-local.yml）。
+# =============================================================================
+
+spring:
+  datasource:
+    url: jdbc:mysql://127.0.0.1:3306/thesis_mgmt?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai&useSSL=false&allowPublicKeyRetrieval=true
+    username: root
+    password: 123456
+
+thesis:
+  jwt:
+    secret: local-dev-only-secret-key-0123456789abcdef

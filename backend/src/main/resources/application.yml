@@ -1,0 +1,80 @@
+server:
+  port: 8080
+  servlet:
+    encoding:
+      charset: UTF-8
+      force: true
+
+spring:
+  application:
+    name: thesis-management
+
+  # ===========================================================================
+  # 数据库连接 —— 以下四个值为占位符，请替换为你自己的 MySQL 8.0 连接信息
+  #   __MYSQL_HOST__      例如 127.0.0.1
+  #   __MYSQL_PORT__      例如 3306
+  #   __MYSQL_USERNAME__  例如 root
+  #   __MYSQL_PASSWORD__  例如 123456
+  # 也可以复制 application-local.yml.example 为 application-local.yml 后
+  # 用 --spring.profiles.active=local 启动，避免改动本文件。
+  # ===========================================================================
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://__MYSQL_HOST__:__MYSQL_PORT__/thesis_mgmt?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai&useSSL=false&allowPublicKeyRetrieval=true
+    username: __MYSQL_USERNAME__
+    password: __MYSQL_PASSWORD__
+    hikari:
+      maximum-pool-size: 20
+      minimum-idle: 5
+      connection-timeout: 30000
+
+  servlet:
+    multipart:
+      max-file-size: 20MB
+      max-request-size: 100MB
+
+  jackson:
+    time-zone: Asia/Shanghai
+    default-property-inclusion: non_null
+
+mybatis-plus:
+  configuration:
+    map-underscore-to-camel-case: true
+  global-config:
+    banner: false
+    db-config:
+      id-type: auto
+      logic-delete-field: deleted
+      logic-delete-value: 1
+      logic-not-delete-value: 0
+
+# =============================================================================
+# 业务配置
+# =============================================================================
+thesis:
+  jwt:
+    # 生产环境请替换为自己的随机密钥（长度 >= 32 字符）
+    secret: thesis-management-demo-secret-key-please-change-in-production
+    expire-minutes: 720
+    header: Authorization
+    prefix: "Bearer "
+
+  # 文件本地存储：落盘到 backend/storage/uploads，经 /uploads/** 静态访问
+  storage:
+    driver: local
+    local-path: storage/uploads
+    url-prefix: /uploads
+    max-file-size: 20971520          # 20MB
+    allowed-ext: pdf,doc,docx,xls,xlsx,zip,jpg,jpeg,png
+
+  # 跨域允许的前端地址（开发期）
+  cors:
+    allowed-origins: http://localhost:5173,http://127.0.0.1:5173
+
+  import:
+    default-password: "123456"       # 批量导入时的初始密码
+
+logging:
+  level:
+    root: info
+    com.example.thesis: debug
