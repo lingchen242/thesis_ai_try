@@ -1,0 +1,280 @@
+/* ==========================================================================
+   全局样式与响应式断点
+   断点约定（与 src/composables/useResponsive.ts 保持一致）：
+     xs < 768px   手机
+     sm 768~992   平板竖屏
+     md 992~1200  平板横屏 / 小笔记本
+     lg > 1200    桌面
+   ========================================================================== */
+
+:root {
+  --app-header-height: 56px;
+  --app-sidebar-width: 220px;
+  --app-sidebar-collapsed: 64px;
+  --app-bg: #f5f7fa;
+  --app-card-radius: 8px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#app {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background: var(--app-bg);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC',
+    'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+  color: #303133;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ---------------------------------------------------------------- 布局骨架 */
+.app-layout {
+  height: 100%;
+}
+
+.app-aside {
+  background: #ffffff;
+  border-right: 1px solid #e4e7ed;
+  transition: width 0.25s ease;
+  overflow: hidden;
+}
+
+.app-aside .logo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: var(--app-header-height);
+  padding: 0 16px;
+  font-weight: 600;
+  font-size: 15px;
+  color: #409eff;
+  white-space: nowrap;
+  border-bottom: 1px solid #f0f2f5;
+}
+
+.app-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: var(--app-header-height);
+  padding: 0 16px;
+  background: #ffffff;
+  border-bottom: 1px solid #e4e7ed;
+}
+
+.app-header-left,
+.app-header-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.app-main {
+  padding: 16px;
+  background: var(--app-bg);
+  overflow-y: auto;
+}
+
+/* ---------------------------------------------------------------- 通用块 */
+.page-card {
+  background: #fff;
+  border-radius: var(--app-card-radius);
+  padding: 16px;
+}
+
+.search-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 12px;
+  align-items: center;
+}
+
+.search-bar .el-input,
+.search-bar .el-select {
+  width: 180px;
+}
+
+.table-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+}
+
+.pagination-wrap {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 16px;
+}
+
+.text-muted {
+  color: #909399;
+  font-size: 12px;
+}
+
+.mt-8 {
+  margin-top: 8px;
+}
+.mt-16 {
+  margin-top: 16px;
+}
+.mb-16 {
+  margin-bottom: 16px;
+}
+
+/* ------------------------------------------------------------- 统计卡片 */
+.stat-card {
+  border-radius: var(--app-card-radius);
+  padding: 16px;
+  background: #fff;
+  height: 100%;
+}
+
+.stat-card .label {
+  font-size: 13px;
+  color: #909399;
+  margin-bottom: 6px;
+}
+
+.stat-card .value {
+  font-size: 24px;
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+.stat-card .value.primary {
+  color: #409eff;
+}
+.stat-card .value.success {
+  color: #67c23a;
+}
+.stat-card .value.warning {
+  color: #e6a23c;
+}
+.stat-card .value.danger {
+  color: #f56c6c;
+}
+
+/* --------------------------------------------------------- 手机端卡片流 */
+.mobile-card-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.mobile-card {
+  background: #fff;
+  border-radius: var(--app-card-radius);
+  padding: 12px;
+}
+
+.mobile-card .row {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 4px 0;
+  font-size: 13px;
+}
+
+.mobile-card .row .k {
+  color: #909399;
+  flex: 0 0 84px;
+}
+
+.mobile-card .row .v {
+  flex: 1;
+  text-align: right;
+  word-break: break-all;
+}
+
+.mobile-card .actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  padding-top: 8px;
+  border-top: 1px solid #f0f2f5;
+  margin-top: 8px;
+}
+
+/* ------------------------------------------------------------- 登录页 */
+.login-page {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100%;
+  padding: 24px;
+  background: linear-gradient(135deg, #e8f2ff 0%, #f5f7fa 60%, #eef6ff 100%);
+}
+
+.login-card {
+  width: 100%;
+  max-width: 400px;
+  background: #fff;
+  border-radius: 12px;
+  padding: 32px 28px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+}
+
+.login-card h2 {
+  margin: 0 0 4px;
+  font-size: 20px;
+}
+
+.login-card .subtitle {
+  color: #909399;
+  font-size: 13px;
+  margin-bottom: 20px;
+}
+
+.login-tips {
+  margin-top: 16px;
+  padding: 10px 12px;
+  background: #f5f7fa;
+  border-radius: 6px;
+  font-size: 12px;
+  color: #909399;
+  line-height: 1.8;
+}
+
+/* ------------------------------------------------------------- 时间轴 */
+.timeline-detail {
+  font-size: 13px;
+  color: #606266;
+}
+
+/* --------------------------------------------------------- Element 微调 */
+.el-card {
+  border-radius: var(--app-card-radius);
+}
+
+.el-table .cell {
+  word-break: break-word;
+}
+
+/* 小屏：隐藏部分次要列由 JS 控制；这里处理内边距 */
+@media (max-width: 768px) {
+  .app-main {
+    padding: 10px;
+  }
+  .page-card {
+    padding: 12px;
+  }
+  .search-bar .el-input,
+  .search-bar .el-select {
+    width: 100%;
+  }
+  .stat-card .value {
+    font-size: 20px;
+  }
+}
