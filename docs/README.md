@@ -186,6 +186,15 @@ A：确认后端已在 8080 端口启动；`vite.config.ts` 已配置 `/api` 与
 **Q：登录成功后立刻提示「登录状态已失效」**
 A：确认后端与前端都已是最新代码。历史上的成因是 Token 的 localStorage 键名在请求层与状态层不一致，现已收敛到 `frontend/src/utils/auth-storage.ts`。排查时看浏览器 Network 中请求是否带 `Authorization: Bearer ...` 头即可定位是前端未带还是后端未认。
 
+**Q：重启后端后，已登录的用户全部掉线**
+A：这是**预期行为**。`application.yml` 已不再提供 JWT 签名密钥的默认值，未配置时服务每次启动都会**随机生成**密钥，重启后旧 Token 自然全部失效。若要避免，在 `application-local.yml` 中配置一个固定的随机字符串（≥ 32 字节）：
+
+```yaml
+thesis:
+  jwt:
+    secret: "用 openssl rand -base64 48 生成的随机串"
+```
+
 **Q：上传的文件在哪里？**
 A：`backend/storage/uploads/`，按业务类型与年月分目录。备份时直接复制该目录。
 

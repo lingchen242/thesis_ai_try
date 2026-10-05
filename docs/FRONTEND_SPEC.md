@@ -296,7 +296,7 @@ const saved = await topicApi.create(form)
 | 业务错误提示 | `code !== 0` 时自动 `ElMessage.error(message)` |
 | 登录失效 | `code === 401` 时清登录态并跳登录页，带 `redirect` |
 | 文件上传 | `http.upload(url, file, params)` 自动组装 `FormData` |
-| 文件下载 | `http.download(url, params, filename)` 触发浏览器下载 |
+| 文件下载 | `http.download(url, params, filename)` 触发浏览器下载；并识别服务端返回的 JSON 错误体，避免把错误信息存成打不开的文件 |
 
 **因此业务代码通常不需要 try/catch 提示错误**；只有需要「失败后阻止后续逻辑」时才捕获（如 `formRef.validate().catch(() => false)`）。
 
