@@ -102,6 +102,24 @@ export const http = {
       responseType: 'blob'
     })
     const blob = response.data as unknown as Blob
+
+    // 服务端失败时（未登录 / 无权限 / 服务异常）返回的是 JSON，而这里以 blob 接收。
+    // 若不识别，会把错误信息当成 xlsx 保存成一个打不开的文件，且用户看不到任何提示。
+    if (blob.type.includes('json')) {
+      const text = await blob.text()
+      try {
+        const result = JSON.parse(text) as { code?: number; message?: string }
+        if (result.code === 401) {
+          redirectToLogin(result.message || '登录状态已失效，请重新登录')
+        } else {
+          ElMessage.error(result.message || '下载失败')
+        }
+      } catch {
+        ElMessage.error('下载失败')
+      }
+      return
+    }
+
     const link = document.createElement('a')
     link.href = URL.createObjectURL(blob)
     link.download = filename || 'download.xlsx'

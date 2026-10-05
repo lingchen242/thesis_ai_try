@@ -137,9 +137,9 @@ public class SelectionService {
         if (topic == null || student == null) {
             throw BizException.notFound("选题或学生数据异常");
         }
-        int capacity = topic.getCapacity() == null ? 1 : topic.getCapacity();
-        int selected = topic.getSelectedCount() == null ? 0 : topic.getSelectedCount();
-        if (selected >= capacity) {
+        // 原子占用名额：把「判断是否满员」与「自增」合并为一条 SQL，由数据库行锁保证并发安全，
+        // 避免两名教师同时录取同一课题导致超录
+        if (topicMapper.claimSeat(topic.getId()) == 0) {
             throw BizException.param("该课题名额已满，无法录取");
         }
 
@@ -149,11 +149,7 @@ public class SelectionService {
         selection.setHandleTime(LocalDateTime.now());
         selectionMapper.updateById(selection);
 
-        topic.setSelectedCount(selected + 1);
-        if (topic.getSelectedCount() >= capacity) {
-            topic.setStatus("SELECTED");
-        }
-        topicMapper.updateById(topic);
+        // 名额与课题状态已在 claimSeat 中同一 SQL 内更新，此处不再重复写 topic
 
         // 建立论文记录
         Thesis thesis = new Thesis();

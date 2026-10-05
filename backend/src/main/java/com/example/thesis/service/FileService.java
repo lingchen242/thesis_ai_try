@@ -3,8 +3,10 @@ package com.example.thesis.service;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.example.thesis.common.BizException;
 import com.example.thesis.common.Constants;
+import com.example.thesis.common.ErrorCode;
 import com.example.thesis.entity.Attachment;
 import com.example.thesis.mapper.AttachmentMapper;
+import com.example.thesis.security.LoginUser;
 import com.example.thesis.security.SecurityUtils;
 import com.example.thesis.storage.StorageService;
 import lombok.RequiredArgsConstructor;
@@ -53,6 +55,7 @@ public class FileService {
             if (attachment == null) {
                 continue;
             }
+            requireUploader(attachment, "只能绑定自己上传的附件");
             attachment.setBizType(bizType.toUpperCase());
             attachment.setBizId(bizId);
             attachmentMapper.updateById(attachment);
@@ -89,13 +92,27 @@ public class FileService {
         return ids.isEmpty() ? List.of() : attachmentMapper.selectBatchIds(ids);
     }
 
-    /** 删除附件：先删文件再删记录 */
+    /** 删除附件：先删文件再删记录。仅上传者本人或管理员可删除 */
     public void delete(Long id) {
         Attachment attachment = attachmentMapper.selectById(id);
         if (attachment == null) {
             throw BizException.notFound("附件不存在");
         }
+        requireUploader(attachment, "只能删除自己上传的附件");
         storageService.delete(attachment.getFileUrl());
         attachmentMapper.deleteById(id);
+    }
+
+    /**
+     * 归属校验：只允许附件上传者本人或管理员操作。
+     * <p>缺少该校验时，任意登录用户只要遍历 id 就能删除或改绑他人上传的定稿文件，
+     * 且磁盘文件会被一并删除、不可恢复。
+     */
+    private void requireUploader(Attachment attachment, String message) {
+        LoginUser user = SecurityUtils.current();
+        if (!user.getId().equals(attachment.getUploaderId())
+                && !Constants.ROLE_ADMIN.equals(user.getRole())) {
+            throw new BizException(ErrorCode.FORBIDDEN, message);
+        }
     }
 }

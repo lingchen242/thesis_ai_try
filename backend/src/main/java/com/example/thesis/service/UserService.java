@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.example.thesis.common.BizException;
 import com.example.thesis.common.Constants;
+import com.example.thesis.security.SecurityUtils;
 import com.example.thesis.common.PageResult;
 import com.example.thesis.dto.PageQuery;
 import com.example.thesis.entity.Student;
@@ -89,6 +90,18 @@ public class UserService {
         if (user == null) {
             throw BizException.notFound("账号不存在");
         }
+        // 自我保护：避免误删当前登录账号
+        if (id.equals(SecurityUtils.userId())) {
+            throw BizException.param("不能删除当前登录的账号");
+        }
+        // 保留至少一个管理员，避免系统失去管理入口后只能改库恢复
+        if (Constants.ROLE_ADMIN.equals(user.getRole())) {
+            Long adminCount = sysUserMapper.selectCount(new LambdaQueryWrapper<SysUser>()
+                    .eq(SysUser::getRole, Constants.ROLE_ADMIN));
+            if (adminCount != null && adminCount <= 1) {
+                throw BizException.param("系统至少需要保留一个管理员账号");
+            }
+        }
         if (Constants.ROLE_STUDENT.equals(user.getRole())) {
             studentMapper.delete(new LambdaQueryWrapper<Student>().eq(Student::getUserId, id));
         } else if (!Constants.ROLE_ADMIN.equals(user.getRole())) {
@@ -163,6 +176,12 @@ public class UserService {
             if (exist == null) {
                 throw BizException.notFound("教师不存在");
             }
+            // 方案 A：工号是身份标识，与登录账号绑定，不允许修改
+            if (StringUtils.hasText(teacher.getTeacherNo())
+                    && !exist.getTeacherNo().equals(teacher.getTeacherNo().trim())) {
+                throw BizException.param("工号不允许修改，如需调整请新建档案并迁移数据");
+            }
+            teacher.setTeacherNo(exist.getTeacherNo());
             teacherMapper.updateById(teacher);
             syncUser(teacher.getUserId(), teacher.getRealName(), teacher.getPhone(),
                     teacher.getEmail(), teacher.getGender());
@@ -229,6 +248,12 @@ public class UserService {
             if (exist == null) {
                 throw BizException.notFound("学生不存在");
             }
+            // 方案 A：学号是身份标识，与登录账号绑定，不允许修改
+            if (StringUtils.hasText(student.getStudentNo())
+                    && !exist.getStudentNo().equals(student.getStudentNo().trim())) {
+                throw BizException.param("学号不允许修改，如需调整请新建档案并迁移数据");
+            }
+            student.setStudentNo(exist.getStudentNo());
             studentMapper.updateById(student);
             syncUser(student.getUserId(), student.getRealName(), student.getPhone(),
                     student.getEmail(), student.getGender());

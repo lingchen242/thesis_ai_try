@@ -15,8 +15,4 @@ public interface StudentMapper extends BaseMapper<Student> {
     @Select("SELECT advisor_id AS advisorId, COUNT(*) AS cnt FROM student "
             + "WHERE deleted = 0 AND advisor_id IS NOT NULL GROUP BY advisor_id")
     List<Map<String, Object>> countByAdvisor();
-
-    /** 各届别学生数 */
-    @Select("SELECT grade AS grade, COUNT(*) AS cnt FROM student WHERE deleted = 0 GROUP BY grade")
-    List<Map<String, Object>> countByGrade();
 }
