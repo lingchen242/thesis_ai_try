@@ -13,7 +13,7 @@ spring:
   # 该文件已被 .gitignore 忽略，不会进入版本控制。
   # 其它环境用环境变量覆盖即可，例如 SPRING_PROFILES_ACTIVE=prod
   profiles:
-    active: ${SPRING_PROFILES_ACTIVE:local}
+    active: "${SPRING_PROFILES_ACTIVE:local}"
 
   # ===========================================================================
   # 数据库连接 —— 以下四个值为占位符，请替换为你自己的 MySQL 8.0 连接信息

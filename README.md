@@ -54,20 +54,25 @@ spring:
     password: __MYSQL_PASSWORD__
 ```
 
-两种方式任选：
-
-**方式 A —— 直接改 yml**（简单，但注意别把密码提交到 git）
-
-**方式 B —— 使用本地 profile**（推荐）
+**请把真实连接信息填到 `application-local.yml`**（该文件已被 `.gitignore` 忽略，不会进入版本控制）：
 
 ```bash
 cd backend/src/main/resources
 cp application-local.yml.example application-local.yml
-# 编辑 application-local.yml 填入真实连接信息
-# 启动时加 --spring.profiles.active=local
+# 编辑 application-local.yml，填入真实的 host / port / username / password
 ```
 
-`.gitignore` 已忽略 `application-local.yml`。
+`application.yml` 中已设置默认激活 `local` profile：
+
+```yaml
+spring:
+  profiles:
+    active: ${SPRING_PROFILES_ACTIVE:local}
+```
+
+因此**无需额外启动参数**，直接启动就会读取 `application-local.yml`；其它环境用环境变量覆盖即可，例如 `SPRING_PROFILES_ACTIVE=prod`。
+
+> ⚠️ 不要把真实账号密码写进 `application.yml`。它是版本控制中的模板文件，一旦填进去就会随提交进入 git 历史。所有个人配置一律放 `application-local.yml`。
 
 ### 3. 启动后端
 
