@@ -312,11 +312,11 @@ onMounted(async () => {
 }
 
 .type-item:hover {
-  background: #f5f7fa;
+  background: var(--el-fill-color-light);
 }
 
 .type-item.active {
-  background: #ecf5ff;
+  background: var(--el-color-primary-light-9);
 }
 
 .type-name {

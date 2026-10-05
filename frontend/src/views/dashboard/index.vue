@@ -118,10 +118,10 @@ const greeting = computed(() => {
 })
 
 const progressColor = [
-  { color: '#f56c6c', percentage: 20 },
-  { color: '#e6a23c', percentage: 60 },
-  { color: '#409eff', percentage: 85 },
-  { color: '#67c23a', percentage: 100 }
+  { color: 'var(--el-color-danger)', percentage: 20 },
+  { color: 'var(--el-color-warning)', percentage: 60 },
+  { color: 'var(--el-color-primary)', percentage: 85 },
+  { color: 'var(--el-color-success)', percentage: 100 }
 ]
 
 interface Card {
@@ -198,7 +198,7 @@ const stageOption = computed(() => {
       {
         type: 'bar',
         barMaxWidth: 34,
-        itemStyle: { color: '#409eff', borderRadius: [4, 4, 0, 0] },
+        itemStyle: { color: 'var(--el-color-primary)', borderRadius: [4, 4, 0, 0] },
         data: list.map((item) => item.count)
       }
     ]
@@ -219,7 +219,7 @@ const scoreOption = computed(() => {
       {
         type: 'bar',
         barMaxWidth: 46,
-        itemStyle: { color: '#67c23a', borderRadius: [4, 4, 0, 0] },
+        itemStyle: { color: 'var(--el-color-success)', borderRadius: [4, 4, 0, 0] },
         data
       }
     ]
@@ -269,11 +269,11 @@ onMounted(load)
 }
 
 .todo-item:hover {
-  background: #f5f7fa;
+  background: var(--el-fill-color-light);
 }
 
 .todo-item + .todo-item {
-  border-top: 1px dashed #ebeef5;
+  border-top: 1px dashed var(--el-border-color-lighter);
 }
 
 .todo-title {

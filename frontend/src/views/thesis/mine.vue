@@ -26,7 +26,7 @@
           <el-descriptions-item label="选题时间">{{ thesis.startTime || '-' }}</el-descriptions-item>
           <el-descriptions-item label="定稿提交">{{ thesis.submitTime || '-' }}</el-descriptions-item>
           <el-descriptions-item v-if="score" label="总评成绩">
-            <span style="color: #f56c6c; font-weight: 600">{{ score.totalScore ?? '-' }}</span>
+            <span class="total-score">{{ score.totalScore ?? '-' }}</span>
             <el-tag size="small" class="mt-8" style="margin-left: 6px">{{ score.level }}</el-tag>
           </el-descriptions-item>
           <el-descriptions-item v-if="thesis.archiveTime" label="归档时间">

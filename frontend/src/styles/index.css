@@ -1,19 +1,15 @@
+@import './variables.css';
+
 /* ==========================================================================
    全局样式与响应式断点
+   --------------------------------------------------------------------------
+   颜色/尺寸令牌统一定义在 variables.css，本文件只放全局基础样式与断点规则。
    断点约定（与 src/composables/useResponsive.ts 保持一致）：
      xs < 768px   手机
      sm 768~992   平板竖屏
      md 992~1200  平板横屏 / 小笔记本
      lg > 1200    桌面
    ========================================================================== */
-
-:root {
-  --app-header-height: 56px;
-  --app-sidebar-width: 220px;
-  --app-sidebar-collapsed: 64px;
-  --app-bg: #f5f7fa;
-  --app-card-radius: 8px;
-}
 
 * {
   box-sizing: border-box;
@@ -31,7 +27,7 @@ body {
   background: var(--app-bg);
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC',
     'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
-  color: #303133;
+  color: var(--el-text-color-primary);
   -webkit-font-smoothing: antialiased;
 }
 
@@ -41,8 +37,8 @@ body {
 }
 
 .app-aside {
-  background: #ffffff;
-  border-right: 1px solid #e4e7ed;
+  background: var(--el-bg-color);
+  border-right: 1px solid var(--el-border-color-light);
   transition: width 0.25s ease;
   overflow: hidden;
 }
@@ -55,9 +51,9 @@ body {
   padding: 0 16px;
   font-weight: 600;
   font-size: 15px;
-  color: #409eff;
+  color: var(--el-color-primary);
   white-space: nowrap;
-  border-bottom: 1px solid #f0f2f5;
+  border-bottom: 1px solid var(--app-border-weak);
 }
 
 .app-header {
@@ -66,8 +62,8 @@ body {
   justify-content: space-between;
   height: var(--app-header-height);
   padding: 0 16px;
-  background: #ffffff;
-  border-bottom: 1px solid #e4e7ed;
+  background: var(--el-bg-color);
+  border-bottom: 1px solid var(--el-border-color-light);
 }
 
 .app-header-left,
@@ -85,7 +81,7 @@ body {
 
 /* ---------------------------------------------------------------- 通用块 */
 .page-card {
-  background: #fff;
+  background: var(--el-bg-color);
   border-radius: var(--app-card-radius);
   padding: 16px;
 }
@@ -119,8 +115,14 @@ body {
 }
 
 .text-muted {
-  color: #909399;
+  color: var(--el-text-color-secondary);
   font-size: 12px;
+}
+
+/* 总评成绩：需要醒目，统一强调色，避免各处重复写行内样式 */
+.total-score {
+  color: var(--el-color-danger);
+  font-weight: 600;
 }
 
 .mt-8 {
@@ -137,13 +139,13 @@ body {
 .stat-card {
   border-radius: var(--app-card-radius);
   padding: 16px;
-  background: #fff;
+  background: var(--el-bg-color);
   height: 100%;
 }
 
 .stat-card .label {
   font-size: 13px;
-  color: #909399;
+  color: var(--el-text-color-secondary);
   margin-bottom: 6px;
 }
 
@@ -154,16 +156,16 @@ body {
 }
 
 .stat-card .value.primary {
-  color: #409eff;
+  color: var(--el-color-primary);
 }
 .stat-card .value.success {
-  color: #67c23a;
+  color: var(--el-color-success);
 }
 .stat-card .value.warning {
-  color: #e6a23c;
+  color: var(--el-color-warning);
 }
 .stat-card .value.danger {
-  color: #f56c6c;
+  color: var(--el-color-danger);
 }
 
 /* --------------------------------------------------------- 手机端卡片流 */
@@ -174,7 +176,7 @@ body {
 }
 
 .mobile-card {
-  background: #fff;
+  background: var(--el-bg-color);
   border-radius: var(--app-card-radius);
   padding: 12px;
 }
@@ -188,7 +190,7 @@ body {
 }
 
 .mobile-card .row .k {
-  color: #909399;
+  color: var(--el-text-color-secondary);
   flex: 0 0 84px;
 }
 
@@ -203,7 +205,7 @@ body {
   justify-content: flex-end;
   gap: 8px;
   padding-top: 8px;
-  border-top: 1px solid #f0f2f5;
+  border-top: 1px solid var(--app-border-weak);
   margin-top: 8px;
 }
 
@@ -214,13 +216,13 @@ body {
   justify-content: center;
   min-height: 100%;
   padding: 24px;
-  background: linear-gradient(135deg, #e8f2ff 0%, #f5f7fa 60%, #eef6ff 100%);
+  background: linear-gradient(135deg, var(--app-tint-blue-deep) 0%, var(--el-fill-color-light) 60%, var(--app-tint-blue) 100%);
 }
 
 .login-card {
   width: 100%;
   max-width: 400px;
-  background: #fff;
+  background: var(--el-bg-color);
   border-radius: 12px;
   padding: 32px 28px;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
@@ -232,7 +234,7 @@ body {
 }
 
 .login-card .subtitle {
-  color: #909399;
+  color: var(--el-text-color-secondary);
   font-size: 13px;
   margin-bottom: 20px;
 }
@@ -240,17 +242,17 @@ body {
 .login-tips {
   margin-top: 16px;
   padding: 10px 12px;
-  background: #f5f7fa;
+  background: var(--el-fill-color-light);
   border-radius: 6px;
   font-size: 12px;
-  color: #909399;
+  color: var(--el-text-color-secondary);
   line-height: 1.8;
 }
 
 /* ------------------------------------------------------------- 时间轴 */
 .timeline-detail {
   font-size: 13px;
-  color: #606266;
+  color: var(--el-text-color-regular);
 }
 
 /* --------------------------------------------------------- Element 微调 */

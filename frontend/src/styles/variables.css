@@ -1,0 +1,34 @@
+/* ==========================================================================
+   设计与颜色令牌（Design Tokens）
+   --------------------------------------------------------------------------
+   规范：组件样式禁止硬编码颜色，一律引用变量。
+   取值分两类：
+     1) 与 Element Plus 调色板一致的，直接引用其内置变量 --el-*（无需在此声明）；
+     2) Element Plus 未覆盖的少量自定义色，在本文件统一定义为 --app-*。
+   这样「一个色值只出现一次」，换肤或调色时只改这里。
+   ========================================================================== */
+
+:root {
+  /* ---------------------------------------------------------- 自定义色
+     以下 3 个取值不在 Element Plus 调色板内，属于本项目的视觉选择 */
+  --app-border-weak: #f0f2f5; /* 极浅分隔线：logo 下沿、移动端卡片内分隔 */
+  --app-tint-blue: #eef6ff; /* 蓝色浅底：登录页渐变收尾、信息块底色 */
+  --app-tint-blue-deep: #e8f2ff; /* 蓝色浅底（更饱和）：登录页渐变起点 */
+
+  /* ---------------------------------------------------------- 结构令牌 */
+  --app-header-height: 56px;
+  --app-sidebar-width: 220px;
+  --app-sidebar-collapsed: 64px;
+  --app-card-radius: 8px;
+
+  /* ---------------------------------------------------------- 语义别名
+     组件里优先使用语义名，而不是直接写颜色含义 */
+  --app-bg: var(--el-fill-color-light); /* 页面底色 */
+  --app-bg-card: var(--el-bg-color); /* 卡片底色 */
+  --app-border: var(--el-border-color-light); /* 常规描边 */
+  --app-border-light: var(--el-border-color-lighter); /* 更浅的分隔线 */
+  --app-text-primary: var(--el-text-color-primary);
+  --app-text-regular: var(--el-text-color-regular);
+  --app-text-secondary: var(--el-text-color-secondary);
+  --app-text-disabled: var(--el-text-color-disabled);
+}

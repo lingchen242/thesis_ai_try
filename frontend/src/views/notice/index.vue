@@ -87,11 +87,11 @@ onMounted(load)
 }
 
 .notice-item:hover {
-  background: #f5f7fa;
+  background: var(--el-fill-color-light);
 }
 
 .notice-item + .notice-item {
-  border-top: 1px dashed #ebeef5;
+  border-top: 1px dashed var(--el-border-color-lighter);
 }
 
 .notice-item.unread .title::before {
@@ -100,7 +100,7 @@ onMounted(load)
   width: 6px;
   height: 6px;
   border-radius: 50%;
-  background: #f56c6c;
+  background: var(--el-color-danger);
   margin-right: 6px;
   vertical-align: middle;
 }
@@ -119,7 +119,7 @@ onMounted(load)
 .content {
   margin-top: 4px;
   font-size: 13px;
-  color: #606266;
+  color: var(--el-text-color-regular);
   line-height: 1.6;
 }
 </style>

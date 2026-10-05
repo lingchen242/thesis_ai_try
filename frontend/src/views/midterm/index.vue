@@ -325,8 +325,8 @@ onMounted(load)
   white-space: pre-wrap;
   font-size: 13px;
   line-height: 1.8;
-  color: #606266;
-  background: #fafafa;
+  color: var(--el-text-color-regular);
+  background: var(--el-fill-color-lighter);
   border-radius: 6px;
   padding: 10px 12px;
   max-height: 320px;

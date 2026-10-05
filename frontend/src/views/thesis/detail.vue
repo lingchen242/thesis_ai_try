@@ -137,7 +137,7 @@
                 <el-descriptions-item label="评阅成绩">{{ score.reviewScore ?? '-' }}</el-descriptions-item>
                 <el-descriptions-item label="答辩成绩">{{ score.defenseScore ?? '-' }}</el-descriptions-item>
                 <el-descriptions-item label="总评">
-                  <span style="color: #f56c6c; font-weight: 600">{{ score.totalScore ?? '-' }}</span>
+                  <span class="total-score">{{ score.totalScore ?? '-' }}</span>
                   <el-tag size="small" style="margin-left: 6px">{{ score.level }}</el-tag>
                 </el-descriptions-item>
               </el-descriptions>
@@ -249,8 +249,8 @@ onMounted(load)
   white-space: pre-wrap;
   font-size: 13px;
   line-height: 1.8;
-  color: #606266;
-  background: #fafafa;
+  color: var(--el-text-color-regular);
+  background: var(--el-fill-color-lighter);
   border-radius: 6px;
   padding: 10px 12px;
 }

@@ -121,7 +121,7 @@ async function remove(item: Attachment) {
   align-items: center;
   gap: 8px;
   padding: 6px 0;
-  border-bottom: 1px dashed #ebeef5;
+  border-bottom: 1px dashed var(--el-border-color-lighter);
   font-size: 13px;
 }
 
@@ -134,17 +134,17 @@ async function remove(item: Attachment) {
 
 .upload-icon {
   font-size: 36px;
-  color: #c0c4cc;
+  color: var(--el-text-color-disabled);
   margin-top: 12px;
 }
 
 .upload-text {
   font-size: 13px;
-  color: #606266;
+  color: var(--el-text-color-regular);
 }
 
 .upload-text em {
-  color: #409eff;
+  color: var(--el-color-primary);
   font-style: normal;
 }
 </style>

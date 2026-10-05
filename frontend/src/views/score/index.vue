@@ -117,10 +117,3 @@ async function recompute(row: ThesisScore) {
 
 onMounted(load)
 </script>
-
-<style scoped>
-.total-score {
-  color: #f56c6c;
-  font-weight: 600;
-}
-</style>

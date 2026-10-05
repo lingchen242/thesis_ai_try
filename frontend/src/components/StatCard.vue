@@ -34,6 +34,6 @@ withDefaults(
 .stat-card .suffix {
   font-size: 13px;
   margin-left: 2px;
-  color: #909399;
+  color: var(--el-text-color-secondary);
 }
 </style>
