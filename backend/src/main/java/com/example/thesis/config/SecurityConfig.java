@@ -6,6 +6,7 @@ import com.example.thesis.security.JwtAuthenticationFilter;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -41,6 +42,20 @@ public class SecurityConfig {
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
+    }
+
+    /**
+     * 阻止 Spring Boot 把 JWT 过滤器再注册成 Servlet 级过滤器。
+     * <p>它只需要在 Spring Security 过滤链里执行一次；否则 {@code /uploads/**} 这类静态资源请求
+     * 也会白跑一遍 Token 解析与用户查库。
+     */
+    @Bean
+    public FilterRegistrationBean<JwtAuthenticationFilter> jwtFilterRegistration(
+            JwtAuthenticationFilter jwtAuthenticationFilter) {
+        FilterRegistrationBean<JwtAuthenticationFilter> registration =
+                new FilterRegistrationBean<>(jwtAuthenticationFilter);
+        registration.setEnabled(false);
+        return registration;
     }
 
     @Bean

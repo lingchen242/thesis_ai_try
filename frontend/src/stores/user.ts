@@ -1,34 +1,28 @@
 import { defineStore } from 'pinia'
 import { computed, ref } from 'vue'
 import { authApi } from '@/api'
+import { clearAuth, getProfile, getToken, setProfile, setToken } from '@/utils/auth-storage'
 import type { Role, Student, SysUser, Teacher } from '@/types'
 
-const TOKEN_KEY = 'thesis_token'
-const USER_KEY = 'thesis_user'
-
-interface StoredUser {
+export interface StoredProfile {
   user: SysUser
   student?: Student
   teacher?: Teacher
 }
 
 export const useUserStore = defineStore('user', () => {
-  const token = ref<string>(localStorage.getItem(TOKEN_KEY) || '')
+  const token = ref<string>(getToken())
   const user = ref<SysUser | null>(null)
   const student = ref<Student | null>(null)
   const teacher = ref<Teacher | null>(null)
   const unread = ref<number>(0)
 
-  const cached = localStorage.getItem(USER_KEY)
-  if (cached) {
-    try {
-      const parsed = JSON.parse(cached) as StoredUser
-      user.value = parsed.user
-      student.value = parsed.student ?? null
-      teacher.value = parsed.teacher ?? null
-    } catch {
-      localStorage.removeItem(USER_KEY)
-    }
+  // 刷新页面后先从本地缓存恢复，避免菜单与身份校验出现闪烁
+  const cached = getProfile()
+  if (cached?.user) {
+    user.value = cached.user
+    student.value = cached.student ?? null
+    teacher.value = cached.teacher ?? null
   }
 
   const role = computed<Role>(() => (user.value?.role ?? 'STUDENT') as Role)
@@ -40,26 +34,18 @@ export const useUserStore = defineStore('user', () => {
   /** 学生/教师档案 ID（业务接口常用） */
   const profileId = computed(() => student.value?.id ?? teacher.value?.id ?? null)
 
-  function persist() {
-    localStorage.setItem(TOKEN_KEY, token.value)
-    if (user.value) {
-      localStorage.setItem(
-        USER_KEY,
-        JSON.stringify({ user: user.value, student: student.value, teacher: teacher.value })
-      )
-    }
-  }
-
-  function apply(payload: StoredUser) {
+  function apply(payload: StoredProfile) {
     user.value = payload.user
     student.value = payload.student ?? null
     teacher.value = payload.teacher ?? null
-    persist()
+    setProfile({ user: user.value, student: student.value, teacher: teacher.value })
   }
 
   async function login(username: string, password: string) {
     const res = await authApi.login({ username, password })
+    // 必须先落盘 Token，再去拉取其它数据，否则并发请求会因缺少 Authorization 头被判定为未登录
     token.value = res.token
+    setToken(res.token)
     apply({ user: res.user, student: res.student, teacher: res.teacher })
     return res
   }
@@ -76,8 +62,7 @@ export const useUserStore = defineStore('user', () => {
     student.value = null
     teacher.value = null
     unread.value = 0
-    localStorage.removeItem(TOKEN_KEY)
-    localStorage.removeItem(USER_KEY)
+    clearAuth()
   }
 
   async function logout() {

@@ -1,6 +1,7 @@
 import axios, { type AxiosInstance, type AxiosRequestConfig } from 'axios'
 import { ElMessage } from 'element-plus'
 import { useUserStore } from '@/stores/user'
+import { getToken } from '@/utils/auth-storage'
 import router from '@/router'
 
 /** 后端统一响应体 */
@@ -16,7 +17,7 @@ const instance: AxiosInstance = axios.create({
 })
 
 instance.interceptors.request.use((config) => {
-  const token = localStorage.getItem('token')
+  const token = getToken()
   if (token) {
     config.headers = config.headers ?? {}
     config.headers.Authorization = `Bearer ${token}`
