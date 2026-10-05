@@ -9,7 +9,9 @@
 | 文档 | 内容 |
 | --- | --- |
 | [PROJECT_PLAN.md](PROJECT_PLAN.md) | 需求、角色权限矩阵、数据模型、状态机、里程碑、风险 |
-| [API.md](API.md) | 后端 REST 接口：约定、数据权限、全部端点、时序、cURL 示例 |
+| [BACKEND.md](BACKEND.md) | 后端架构与代码导读：分层、请求生命周期、业务规则位置、扩展点 |
+| [BACKEND_REVIEW.md](BACKEND_REVIEW.md) | **后端代码审查报告**：3 项 P1 / 6 项 P2 / 5 项 P3，含逐条修复建议 |
+| [API.md](API.md) | 后端 REST 接口：约定、数据权限、90 个端点、时序、cURL 示例 |
 | [DATABASE.md](DATABASE.md) | 数据库设计：20 张表、实体关系、索引、设计取舍、演示数据 |
 | [FRONTEND_SPEC.md](FRONTEND_SPEC.md) | 前端开发规范与合规自查清单 |
 

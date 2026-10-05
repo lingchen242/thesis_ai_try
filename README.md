@@ -55,6 +55,8 @@ cd frontend && npm install && npm run dev
 | --- | --- |
 | [docs/README.md](docs/README.md) | **项目介绍主文档**：快速开始、核心设计、功能模块、常见问题 |
 | [docs/PROJECT_PLAN.md](docs/PROJECT_PLAN.md) | 项目计划：需求、权限矩阵、数据模型、状态机、里程碑、风险 |
-| [docs/API.md](docs/API.md) | 后端 REST 接口文档 |
+| [docs/BACKEND.md](docs/BACKEND.md) | 后端架构与代码导读 |
+| [docs/BACKEND_REVIEW.md](docs/BACKEND_REVIEW.md) | 后端代码审查报告（分级问题 + 修复建议） |
+| [docs/API.md](docs/API.md) | 后端 REST 接口文档（90 个端点） |
 | [docs/DATABASE.md](docs/DATABASE.md) | 数据库设计说明 |
 | [docs/FRONTEND_SPEC.md](docs/FRONTEND_SPEC.md) | 前端开发规范与自查清单 |

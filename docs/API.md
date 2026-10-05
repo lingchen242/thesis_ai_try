@@ -8,7 +8,8 @@
 | 接口前缀 | `/api` |
 | 数据格式 | `application/json; charset=UTF-8` |
 | 认证方式 | JWT，请求头 `Authorization: Bearer <token>` |
-| 代码位置 | `backend/src/main/java/com/example/thesis/controller/`（共 10 个控制器） |
+| 接口规模 | **90 个端点**，分布在 11 个控制器中 |
+| 代码位置 | `backend/src/main/java/com/example/thesis/controller/` |
 
 ---
 
@@ -94,8 +95,12 @@ Token 有效期由 `thesis.jwt.expire-minutes` 控制（默认 720 分钟）。�
 | --- | --- | --- | --- | --- | --- | --- |
 | `STUDENT` | 仅开放申报中 + 自己已申报的 | 仅自己的 | 仅自己的 | 仅自己的 | 仅自己论文的 | 只读 |
 | `ADVISOR` | 仅自己出的题 | 仅自己课题收到的 | 仅自己指导的 | 仅自己指导的 | 仅自己指导的 | 只读 |
-| `REVIEWER` | 全部（只读） | 无 | 仅被指派评阅的 | 仅被指派评阅的 | 仅指派给自己的 | 仅自己所在答辩组的 |
+| `REVIEWER` | 全部（只读） | ⚠️ 当前未限制 | 仅被指派评阅的 | ⚠️ 当前未限制 | 仅指派给自己的 | 仅自己所在答辩组的 |
 | `ADMIN` | 全部 | 全部 | 全部 | 全部 | 全部 | 全部 |
+
+> ⚠️ **上表中两处标记为「当前未限制」的，是代码实现与设计意图不符的已知缺陷**：`GET /api/proposals`、`GET /api/midterms`、`GET /api/selections` 三个列表接口对 `REVIEWER` 没有加数据范围条件，导致评阅教师能读到全院的开题/中期报告正文与选题申请详情。
+>
+> 接口的**调用方式不受影响**，无需改动前端；修复属于后端一次性改动，详见 [BACKEND_REVIEW.md 的 P1-1](BACKEND_REVIEW.md#p1-1-数据权限不一致reviewer-可越权读取全部开题--中期--选题数据)。
 
 > 越权访问单条资源（如学生查看他人论文）会抛出 `403`，而不是返回空数据。
 
@@ -783,9 +788,15 @@ const page = await topicApi.page({ pageNum: 1, pageSize: 10, keyword: '深度学
 
 ## 七、已知限制与后续优化
 
+本节只列**与接口行为直接相关**的限制。完整的后端问题清单（含安全、并发、死代码）见 **[BACKEND_REVIEW.md](BACKEND_REVIEW.md)**。
+
 | 项 | 现状 | 建议 |
 | --- | --- | --- |
-| 附件删除权限 | 仅校验登录，未校验是否本人上传 | 如需收紧，在 `FileService.delete()` 中比对 `uploader_id` 或限定管理员 |
+| **开题/中期/选题列表的数据范围** | `REVIEWER` 未加限制，可读到非本人评阅的数据 | 见 [BACKEND_REVIEW P1-1](BACKEND_REVIEW.md#p1-1-数据权限不一致reviewer-可越权读取全部开题--中期--选题数据)，修复后接口调用方式不变 |
+| 附件删除 / 绑定 | 仅校验登录，未校验是否本人上传 | 见 [BACKEND_REVIEW P1-3](BACKEND_REVIEW.md#p1-3-附件可被越权删除--改绑) |
+| 登录接口 | 无失败次数限制 | 见 [BACKEND_REVIEW P2-5](BACKEND_REVIEW.md#p2-5-登录接口无失败次数限制可被暴力破解) |
+| 模板下载失败响应 | 失败时返回 JSON，但前端按 blob 接收，会存成坏文件 | 见 [BACKEND_REVIEW P2-6](BACKEND_REVIEW.md#p2-6-模板下载接口的失败响应类型与前端不匹配)，前端侧即可修复 |
 | Token 黑名单 | 内存实现，多实例部署会不一致 | 换 Redis 存储即可，接口无需改动 |
+| `GET /api/theses/{id}/detail` | 一次返回 8 类数据，字段多 | 数据量增大后可拆分为按需加载 |
 | 查重 | 未实现 | 状态机已在 `FINAL_SUBMITTED` 前预留扩展点 |
-| 接口文档化 | 本文档为手工维护 | 可引入 springdoc-openapi 自动生成并对齐本文档 |
+| 接口文档化 | 本文档为手工维护 | 可引入 springdoc-openapi 自动生成并与本文档对齐 |
