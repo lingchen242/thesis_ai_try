@@ -2,15 +2,16 @@
 
 面向高校院系的毕业论文（设计）全过程管理系统，覆盖 **选题 → 开题 → 中期检查 → 定稿 → 评阅 → 答辩 → 归档** 完整链路，做到流程可追溯、材料可留存、进度可视化。
 
-> 本文件是项目介绍主文档。仓库根目录的 `README.md` 是精简入口，完整说明都在本目录。
+本文件是项目介绍主文档，包含核心设计与配置说明。**只想先把系统跑起来**的话，看仓库根目录的 [README.md](../README.md) 即可。
 
 ## 文档索引
 
 | 文档 | 内容 |
 | --- | --- |
+| [USER_GUIDE.md](USER_GUIDE.md) | 使用说明：四类角色各自的操作流程 |
 | [PROJECT_PLAN.md](PROJECT_PLAN.md) | 需求、角色权限矩阵、数据模型、状态机、里程碑、风险 |
 | [BACKEND.md](BACKEND.md) | 后端架构与代码导读：分层、请求生命周期、业务规则位置、扩展点 |
-| [BACKEND_REVIEW.md](BACKEND_REVIEW.md) | **后端代码审查报告**：3 项 P1 / 6 项 P2 / 5 项 P3，含逐条修复建议 |
+| [BACKEND_REVIEW.md](BACKEND_REVIEW.md) | 后端代码审查报告：分级问题清单与修复建议 |
 | [API.md](API.md) | 后端 REST 接口：约定、数据权限、90 个端点、时序、cURL 示例 |
 | [DATABASE.md](DATABASE.md) | 数据库设计：20 张表、实体关系、索引、设计取舍、演示数据 |
 | [FRONTEND_SPEC.md](FRONTEND_SPEC.md) | 前端开发规范与合规自查清单 |
@@ -21,21 +22,21 @@
 
 | 层 | 选型 |
 | --- | --- |
-| 前端 | Vue 3 + TypeScript + Vite + Element Plus + Pinia + Vue Router + ECharts |
-| 后端 | Spring Boot 3.2 + MyBatis Plus 3.5 + Spring Security 6 + JWT |
-| 数据库 | MySQL 8.0（utf8mb4 / InnoDB） |
-| 文件存储 | **本地静态目录** `backend/storage/uploads/`，通过 `/uploads/**` 映射访问 |
+| 前端 | Vue 3（组合式 API）+ TypeScript + Vite + Element Plus + Pinia + Vue Router + ECharts |
+| 后端 | Spring Boot 3.2 + MyBatis Plus 3.5 + Spring Security 6 + JJWT 0.11.5 |
+| 数据库 | MySQL 8.0（utf8mb4 / InnoDB，20 张表） |
+| 文件存储 | 本地静态目录 `backend/storage/uploads/`，经 `/uploads/**` 访问 |
 | 构建 | Maven 3.8+ / JDK 17+（已在 JDK 21 验证）；Node 18+ |
 
 ## 目录结构（三目录分离）
 
 ```
-thesis-management/
+.
 ├── backend/        后端 Spring Boot 工程（含本地文件存储目录 storage/）
 ├── frontend/       前端 Vue3 工程
 ├── database/       数据库脚本（建表 + 字典 + 演示数据）
 ├── scripts/        演示数据生成与自检脚本
-└── docs/           全部项目文档（本目录）
+└── docs/           全部项目文档
 ```
 
 ---
@@ -103,7 +104,11 @@ npm run dev
 | 评阅教师 | `r3001` ~ `r3006` | `123456` |
 | 学生 | `s20260001` ~ `s20270043` | `123456` |
 
-> 演示数据中 2026 届学生已完成全流程（答辩完成 / 已归档），2027 届学生分布在进行中的各阶段，可直接查看各页面效果。
+> 演示数据由脚本生成，**姓名、学号、联系方式均为虚构**，仅用于功能演示。密码仅为演示便利，请勿在生产环境沿用。
+>
+> 数据中 2026 届学生已完成全流程（答辩完成 / 已归档），2027 届学生分布在进行中的各阶段，可以直接查看各类页面的实际效果。
+
+各角色具体怎么操作，见 [USER_GUIDE.md](USER_GUIDE.md)。
 
 ---
 
@@ -125,7 +130,7 @@ DRAFT → PROPOSAL_SUBMITTED → PROPOSAL_APPROVED → MIDTERM_SUBMITTED → MID
 ### 统一字典管理
 
 - `sys_dict_type` 定义类型，`sys_dict_item` 通过 `parent_id` 支持**学院 → 专业 → 班级**三级树
-- 管理员在「系统管理 → 字典管理」维护，前端 `useDictStore` 按类型缓存
+- 管理员在「系统管理 → 字典管理」维护，前端按类型缓存，避免每个下拉框重复请求
 - 业务表**冗余存名称**，保证归档数据不随字典调整漂移（详见 [DATABASE.md](DATABASE.md#62-业务表为什么冗余存名称)）
 - 新增学生 / 课题时，相关字段必须命中字典项，否则拒绝并提示
 
@@ -141,6 +146,13 @@ DRAFT → PROPOSAL_SUBMITTED → PROPOSAL_APPROVED → MIDTERM_SUBMITTED → MID
 
 - 状态流转、审核、指派、录入成绩都会写 `audit_log`，论文详情页时间轴即读该表
 - 状态变更向相关人推送站内消息（顶栏铃铛红点）
+- 留痕与业务写操作在同一事务内，业务回滚时留痕一起回滚，不会出现「操作没成功但有记录」
+
+### 认证方式
+
+无状态 JWT：登录时把用户 ID 用固定密钥签成一个有效期 12 小时的凭证，之后每次请求验签并**回查数据库**取最新状态。这样账号被禁用、被删除、角色被调整都会立即生效，代价是每个请求多一次主键查询。
+
+详细逻辑见 [BACKEND.md](BACKEND.md)，接口约定见 [API.md](API.md)。
 
 ---
 
@@ -152,7 +164,7 @@ DRAFT → PROPOSAL_SUBMITTED → PROPOSAL_APPROVED → MIDTERM_SUBMITTED → MID
 | 课题管理 | 教师出题（草稿 / 发布 / 关闭），学生浏览与申报 |
 | 选题管理 | 导师录取 / 驳回，录取后自动创建论文记录并回填学生指导教师 |
 | 开题管理 | 学生提交（正文 + 附件），导师审核（通过 / 退回 + 成绩 + 意见） |
-| 中期检查 | 学生提交（进度百分比 + 正文），导师检查，**超期预警名单** |
+| 中期检查 | 学生提交（进度百分比 + 正文），导师检查，超期预警名单 |
 | 论文定稿 | 学生上传定稿（多版本），管理员指派评阅 |
 | 论文评阅 | 指派（可自动挑任务最少的教师）/ 盲审开关 / 打分评语；全部提交后自动推进，平均分 < 60 退回重交 |
 | 答辩管理 | 建组 → 设置成员（组长 / 秘书 / 委员）→ 编入学生 → 录入成绩，自动推进并重算总评 |
@@ -184,10 +196,10 @@ A：`application-local.yml` 没建或没填对，或数据库未导入。见「�
 A：确认后端已在 8080 端口启动；`vite.config.ts` 已配置 `/api` 与 `/uploads` 代理，改端口需同步修改。
 
 **Q：登录成功后立刻提示「登录状态已失效」**
-A：确认后端与前端都已是最新代码。历史上的成因是 Token 的 localStorage 键名在请求层与状态层不一致，现已收敛到 `frontend/src/utils/auth-storage.ts`。排查时看浏览器 Network 中请求是否带 `Authorization: Bearer ...` 头即可定位是前端未带还是后端未认。
+A：确认后端与前端都已是最新代码。排查时看浏览器 Network 中请求是否带 `Authorization: Bearer ...` 头，即可定位是前端未带还是后端未认。
 
 **Q：重启后端后，已登录的用户全部掉线**
-A：这是**预期行为**。`application.yml` 已不再提供 JWT 签名密钥的默认值，未配置时服务每次启动都会**随机生成**密钥，重启后旧 Token 自然全部失效。若要避免，在 `application-local.yml` 中配置一个固定的随机字符串（≥ 32 字节）：
+A：正常情况下不会。只有在没有配置 JWT 签名密钥时才会——此时服务每次启动都会随机生成密钥，重启后旧 Token 自然失效。要避免就在 `application-local.yml` 中配置一个固定的随机字符串（≥ 32 字节）：
 
 ```yaml
 thesis:
@@ -202,7 +214,24 @@ A：`backend/storage/uploads/`，按业务类型与年月分目录。备份时�
 A：在「教师管理」编辑该教师，打开「可被指派评阅」开关。
 
 **Q：调整评分权重**
-A：「系统管理 → 系统配置」修改 `score.weight.*`，未评分环节不计入分母，不会把总分拉低。
+A：「系统管理 → 系统配置」修改 `score.weight.*`，未评分环节不计入分母。
+
+---
+
+## 已知限制
+
+用于正式场景前请了解：
+
+| 项 | 现状 |
+| --- | --- |
+| 开题 / 中期 / 选题列表的数据范围 | 评阅教师未被限制，可读到全院数据。**已知缺陷，尚未修复** |
+| 登录接口 | 无失败次数限制 |
+| Token 黑名单 | 内存实现，多实例部署需替换为 Redis |
+| Token 有效期 | 无滑动续期，默认 12 小时，到点需重新登录 |
+| 论文查重 | 未实现 |
+| 演示数据密码 | 较简单，仅供本地体验 |
+
+完整的问题清单与修复建议见 [BACKEND_REVIEW.md](BACKEND_REVIEW.md)。
 
 ---
 
@@ -210,7 +239,8 @@ A：「系统管理 → 系统配置」修改 `score.weight.*`，未评分环节
 
 | 项 | 结果 |
 | --- | --- |
-| 后端 `mvn clean package -DskipTests` | ✅ BUILD SUCCESS，产出 `target/thesis-management.jar` |
-| 前端 `vue-tsc --noEmit` | ✅ 0 错误 |
-| 前端 `vite build` | ✅ 通过 |
-| 数据库脚本 `scripts/check_sql.py` | ✅ 结构 / 唯一键 / 引用完整性 / 字典一致性 / 状态分布 全部通过 |
+| 后端 `mvn clean package -DskipTests` | 通过，产出 `target/thesis-management.jar` |
+| 前端 `vue-tsc --noEmit` | 0 错误 |
+| 前端 `vite build` | 通过 |
+| 数据库脚本 `scripts/check_sql.py` | 结构 / 唯一键 / 引用完整性 / 字典一致性 / 状态分布 全部通过 |
+| 前端规范自查（9 项） | 全部通过，见 [FRONTEND_SPEC.md](FRONTEND_SPEC.md#十五合规现状) |
