@@ -53,3 +53,6 @@ __pycache__/
 
 # WorkBuddy 工作区本地状态（记忆、缓存等，不入库）
 .workbuddy/
+
+# 内部代码审查报告：仅本地留存，不随公开仓库发布
+docs/BACKEND_REVIEW.md

@@ -129,9 +129,9 @@ DRAFT → PROPOSAL_SUBMITTED → PROPOSAL_APPROVED → MIDTERM_SUBMITTED → MID
 | `ThesisService.requireAdvisorThesis()` | `service/ThesisService.java` | 开题/中期审核必须是自己指导的论文 |
 | `ProposalService.visibleThesisIds()` | `service/ProposalService.java` | 开题列表范围 ⚠️ 见审查报告 P1-1 |
 | `MidtermService.visibleThesisIds()` | `service/MidtermService.java` | 中期列表范围 ⚠️ 见审查报告 P1-1 |
-| `SelectionService.page()` | `service/SelectionService.java` | 选题列表范围 ⚠️ 见审查报告 P1-1 |
+| `SelectionService.page()` | `service/SelectionService.java` | 选题列表范围 ⚠️ 见下方说明 |
 
-> ⚠️ 标记的三处对 `REVIEWER` 角色没有限定分支，会导致越权读取，详见 [BACKEND_REVIEW.md](BACKEND_REVIEW.md#p1-1-数据权限不一致reviewer-可越权读取全部开题--中期--选题数据)。
+> ⚠️ 标记的三处对 `REVIEWER` 角色没有限定分支，会导致越权读取（已知缺陷，截至目前尚未修复）。
 
 ### 3.3 成绩计算 —— `domain/ScoreRule.java`
 
@@ -285,7 +285,6 @@ application-local.yml      本地真实连接信息，已被 .gitignore 忽略
 
 | 文档 | 内容 |
 | --- | --- |
-| [BACKEND_REVIEW.md](BACKEND_REVIEW.md) | **代码审查报告**：分级问题清单与修复建议（本次交付重点） |
 | [API.md](API.md) | 接口文档：90 个端点、数据权限、时序、cURL |
 | [DATABASE.md](DATABASE.md) | 20 张表、实体关系、索引、设计取舍 |
 | [PROJECT_PLAN.md](PROJECT_PLAN.md) | 项目计划与里程碑 |

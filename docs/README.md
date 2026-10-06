@@ -11,7 +11,6 @@
 | [USER_GUIDE.md](USER_GUIDE.md) | 使用说明：四类角色各自的操作流程 |
 | [PROJECT_PLAN.md](PROJECT_PLAN.md) | 需求、角色权限矩阵、数据模型、状态机、里程碑、风险 |
 | [BACKEND.md](BACKEND.md) | 后端架构与代码导读：分层、请求生命周期、业务规则位置、扩展点 |
-| [BACKEND_REVIEW.md](BACKEND_REVIEW.md) | 后端代码审查报告：分级问题清单与修复建议 |
 | [API.md](API.md) | 后端 REST 接口：约定、数据权限、90 个端点、时序、cURL 示例 |
 | [DATABASE.md](DATABASE.md) | 数据库设计：20 张表、实体关系、索引、设计取舍、演示数据 |
 | [FRONTEND_SPEC.md](FRONTEND_SPEC.md) | 前端开发规范与合规自查清单 |
@@ -230,8 +229,6 @@ A：「系统管理 → 系统配置」修改 `score.weight.*`，未评分环节
 | Token 有效期 | 无滑动续期，默认 12 小时，到点需重新登录 |
 | 论文查重 | 未实现 |
 | 演示数据密码 | 较简单，仅供本地体验 |
-
-完整的问题清单与修复建议见 [BACKEND_REVIEW.md](BACKEND_REVIEW.md)。
 
 ---
 

@@ -116,13 +116,12 @@ npm run dev
 | [docs/API.md](docs/API.md) | 后端 REST 接口文档（90 个端点、数据权限、调用时序） |
 | [docs/DATABASE.md](docs/DATABASE.md) | 数据库设计：20 张表、实体关系、索引、设计取舍 |
 | [docs/FRONTEND_SPEC.md](docs/FRONTEND_SPEC.md) | 前端开发规范与合规自查清单 |
-| [docs/BACKEND_REVIEW.md](docs/BACKEND_REVIEW.md) | 后端代码审查报告：分级问题清单与修复建议 |
 
 ## 已知限制
 
 在用于正式场景前，请了解以下几点：
 
-- **开题 / 中期 / 选题三个列表接口对评阅教师未做数据范围限制**，评阅教师可读到全院数据。这是已知缺陷且尚未修复，详见 [BACKEND_REVIEW.md 的 P1-1](docs/BACKEND_REVIEW.md#p1-1-数据权限不一致reviewer-可越权读取全部开题--中期--选题数据)
+- **开题 / 中期 / 选题三个列表接口对评阅教师未做数据范围限制**，评阅教师可读到全院数据。这是已知缺陷且尚未修复
 - 登录接口无失败次数限制
 - Token 黑名单为内存实现，多实例部署需替换为 Redis
 - 无 Token 滑动续期，有效期默认 12 小时，到点需重新登录
